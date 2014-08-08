@@ -234,7 +234,7 @@ public class Launcher extends JFrame
 			Insets insets = this.getInsets();
 			return new Dimension(
 				400 + insets.left + insets.right,
-				nr * 64 + insets.top + insets.bottom);
+				nr * (64 + 5) + insets.top + insets.bottom);
 		}
 
 		@Override
@@ -266,7 +266,7 @@ public class Launcher extends JFrame
 			{
 				if (i == this.selected)
 				{
-					g.setColor(selectedColor);
+					g.setColor(new Color(1.0f, 1f, 1f, 0.9f));
 					g.fillRect(0, i * 64, this.getWidth(), 64);
 				}
 
@@ -280,7 +280,7 @@ public class Launcher extends JFrame
 					BufferedImage icon = ImageIO.read(new File(iconPath));
 					g.drawImage(icon, 
 						insets.left + 0, 
-						insets.top + i * 64, 
+						insets.top + i * (64 + 5), 
 						64, 64, null);
 				}
 				catch (IOException ex)
@@ -290,7 +290,7 @@ public class Launcher extends JFrame
 				g.setColor(nameColor);
 				g.drawString(entry.name, 
 					insets.left + 64 + 15, 
-					4 + insets.top + i * 64 + nameFontAscent);
+					4 + insets.top + i * (64 + 5) + nameFontAscent);
 				
 				if (entry.comment != null)
 				{
@@ -298,7 +298,7 @@ public class Launcher extends JFrame
 					g.setColor(commentColor);
 					g.drawString(truncateText(entry.comment, 300, g.getFontMetrics()),
 						insets.left + 64 + 15,
-						4 + insets.top + i * 64 + nameFontHeight + commentFontAscent); 
+						4 + insets.top + i * (64 + 5) + nameFontHeight + commentFontAscent); 
 				}
 
 				if (entry.exec != null)
@@ -307,7 +307,7 @@ public class Launcher extends JFrame
 					g.setColor(commandColor);	
 					g.drawString(truncateText(entry.exec, 300, g.getFontMetrics()), 
 						insets.left + 64 + 15,
-						4 + insets.top + i * 64 + nameFontHeight 
+						4 + insets.top + i * (64 + 5) + nameFontHeight 
 							+ commentFontHeight + commentFontAscent);
 				}
 			}

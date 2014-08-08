@@ -13,6 +13,12 @@ public class DesktopEntry
 	public String exec;
 	public String icon;
 	public boolean noDisplay = false;
+	private List<String> onlyShowIn;
+
+	public DesktopEntry()
+	{
+		this.onlyShowIn = new ArrayList<String>();
+	}
 
 	public String getType()
 	{
@@ -33,10 +39,11 @@ public class DesktopEntry
 	{
 		return this.exec;
 	}
-
-	public boolean showInMenu()
+	
+	public boolean showInMenu(String ownIdentifier)
 	{
-		return !this.noDisplay;
+		return !this.noDisplay && (this.onlyShowIn.isEmpty() || 
+			this.onlyShowIn.contains(ownIdentifier));
 	}
 
 	public static DesktopEntry fromDesktopFile(String path)
@@ -71,6 +78,9 @@ public class DesktopEntry
 							entry.icon = value;
 						if (key.equals("NoDisplay"))
 							entry.noDisplay = Boolean.parseBoolean(value);
+						if (key.equals("OnlyShowIn"))
+							for (String identifier : value.split(";"))
+								entry.onlyShowIn.add(identifier);
 					}
 				}
 				else if (line.startsWith("["))

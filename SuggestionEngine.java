@@ -1,15 +1,93 @@
 import java.util.List;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Iterator;
 import java.util.function.Predicate;
+import java.io.File;
+import java.io.IOException;
+import java.io.BufferedReader;
+import java.io.PrintWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.util.Collections;
 
 public class SuggestionEngine
 {
 	private List<DesktopEntry> candidates;
+	private HashMap<String, Integer> history;
 
 	public SuggestionEngine(List<DesktopEntry> candidates)
 	{
 		this.candidates = candidates;
+		this.loadHistory();
+
+		// Sort by frequency
+		Collections.sort(this.candidates, (a, b) -> Integer.compare(
+				history.containsKey(b.name) ? history.get(b.name) : 0,
+				history.containsKey(a.name) ? history.get(a.name) : 0));
+	}
+
+	private void loadHistory()
+	{
+		this.history = new HashMap<String, Integer>();
+		File directory = new File(new File(System.getProperty("user.home")), 
+			".launcher");
+		File historyFile = new File(directory, "history");
+		if (historyFile.exists())
+		{
+			try (BufferedReader reader = new BufferedReader(
+				new FileReader(historyFile)))
+			{
+				for (String line = reader.readLine(); line != null;
+					line = reader.readLine())
+				{
+					int split = line.indexOf(':');
+					if (split >= 0)
+					{
+						String name = line.substring(split + 1, line.length());
+						String count = line.substring(0, split);
+
+						this.history.put(name, Integer.parseInt(count));
+					}
+				}
+			}
+			catch (IOException ex)
+			{
+				ex.printStackTrace();
+			}
+		}
+	}
+
+	public void registerSelection(DesktopEntry entry)
+	{
+		int count = this.history.containsKey(entry.name) ?
+			this.history.get(entry.name) : 0;
+		this.history.put(entry.name, count + 1);
+
+		this.saveHistory();
+	}
+
+	private void saveHistory()
+	{
+		File directory = new File(new File(System.getProperty("user.home")), 
+			".launcher");
+		if (!directory.exists())
+			directory.mkdir();
+		
+		File historyFile = new File(directory, "history");
+		try (PrintWriter writer = new PrintWriter(
+			new FileWriter(historyFile, false)))
+		{
+			for (Map.Entry<String, Integer> entry : this.history.entrySet())
+			{
+				writer.println(entry.getValue() + ":" + entry.getKey());
+			}
+		}
+		catch (IOException ex)
+		{
+			ex.printStackTrace();
+		}
 	}
 
 	public List<DesktopEntry> getSuggestions(String partial)

@@ -90,7 +90,11 @@ public class Launcher extends JFrame
 	{
 		for (File file : new File(root).listFiles())
 			if (file.isFile() && file.getName().endsWith(".desktop"))
-				this.desktopEntries.add(DesktopEntry.fromDesktopFile(file.getPath()));
+			{
+				DesktopEntry entry = DesktopEntry.fromDesktopFile(file.getPath());
+				if (entry.showInMenu("Launcher"))
+					this.desktopEntries.add(entry);
+			}
 	}
 
 	protected void updateSuggestions()
@@ -105,8 +109,10 @@ public class Launcher extends JFrame
 		DesktopEntry selected = this.suggestionList.getSelected();
 		if (selected != null)
 		{
+			this.suggestionEngine.registerSelection(selected);
 			try
 			{
+				System.out.println(selected.exec);
 				Runtime.getRuntime().exec(selected.exec);
 			}
 			catch (IOException ex)

@@ -81,7 +81,14 @@ public class Launcher extends JFrame
 	protected void loadDesktopEntries()
 	{
 		this.desktopEntries = new ArrayList<DesktopEntry>();
-		for (File file : new File("/usr/share/applications").listFiles())
+		this.loadDesktopEntries("/usr/share/applications");
+		this.loadDesktopEntries(System.getProperty("user.home") + 
+			"/.local/share/applications");
+	}
+
+	protected void loadDesktopEntries(String root)
+	{
+		for (File file : new File(root).listFiles())
 			if (file.isFile() && file.getName().endsWith(".desktop"))
 				this.desktopEntries.add(DesktopEntry.fromDesktopFile(file.getPath()));
 	}

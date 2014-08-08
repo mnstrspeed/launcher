@@ -89,10 +89,21 @@ public class DesktopEntry
 
 	public String findIcon()
 	{
-		return findIcon(this.icon, "hicolor", 64);
+		String[] themes = new String[] {
+			"/usr/share/icons/hicolor",
+			System.getProperty("user.home") + "/.local/share/icons/hicolor"
+		};
+
+		for (String theme : themes)
+		{
+			String path = findIcon(this.icon, "/usr/share/icons/hicolor", 64);
+			if (path != null)
+				return path;
+		}
+		return null;
 	}
 
-	private static String findIcon(String icon, String theme, int targetSize)
+	private static String findIcon(String icon, String themeRoot, int targetSize)
 	{
 		if (icon == null)
 			return null;
@@ -100,7 +111,7 @@ public class DesktopEntry
 		String bestIcon = "";
 		int bestSize = -1;
 
-		File themeFolder = new File("/usr/share/icons/" + theme);
+		File themeFolder = new File(themeRoot);
 		for (File sizeFolder : themeFolder.listFiles())
 		{
 			if (sizeFolder.isDirectory() && sizeFolder.getName().contains("x"))

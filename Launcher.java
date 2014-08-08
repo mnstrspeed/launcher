@@ -168,7 +168,8 @@ public class Launcher extends JFrame
 
 			System.out.println("");
 			for (DesktopEntry entry : this.suggestions)
-				System.out.println(entry.name);
+				System.out.println(entry.name + "(" + entry.icon + " at " +
+					entry.findIcon() + ")");
 
 			this.repaint();
 		}
@@ -231,19 +232,14 @@ public class Launcher extends JFrame
 
 			Graphics2D g2d = (Graphics2D)g;
 			g2d.setRenderingHint(
-				RenderingHints.KEY_TEXT_ANTIALIASING,
-				RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-			g2d.setRenderingHint(
-				RenderingHints.KEY_INTERPOLATION,
-				RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-			g2d.setRenderingHint(
-				RenderingHints.KEY_ALPHA_INTERPOLATION,
-				RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY);
+				RenderingHints.KEY_ANTIALIASING,
+				RenderingHints.VALUE_ANTIALIAS_ON);
 			
-			Font nameFont = new Font("FreeSans", Font.PLAIN, 16);
+			String fontName = g.getFont().getName();
+			Font nameFont = new Font(fontName, Font.PLAIN, 16);
 			int nameFontAscent = g.getFontMetrics(nameFont).getAscent();
 			int nameFontHeight = g.getFontMetrics(nameFont).getHeight();
-			Font commentFont = new Font("FreeSans", Font.PLAIN, 14);
+			Font commentFont = new Font(fontName, Font.PLAIN, 14);
 			int commentFontAscent = g.getFontMetrics(commentFont).getAscent();
 			int commentFontHeight = g.getFontMetrics(commentFont).getHeight();
 
@@ -275,9 +271,7 @@ public class Launcher extends JFrame
 						64, 64, null);
 				}
 				catch (IOException ex)
-				{
-					System.out.println("Couldn't load icon for " + entry.name);
-				}
+				{ }
 
 				g.setFont(nameFont);
 				g.setColor(nameColor);
@@ -285,21 +279,39 @@ public class Launcher extends JFrame
 					insets.left + 64 + 15, 
 					4 + insets.top + i * 64 + nameFontAscent);
 				
-				g.setFont(commentFont);
-				g.setColor(commentColor);
-				g.drawString(entry.comment != null ? entry.comment : "", 
-					insets.left + 64 + 15,
-					4 + insets.top + i * 64 + nameFontHeight + commentFontAscent); 
-			
-				g.setColor(commandColor);	
+				if (entry.comment != null)
+				{
+					g.setFont(commentFont);
+					g.setColor(commentColor);
+					g.drawString(truncateText(entry.comment, 300, g.getFontMetrics()),
+						insets.left + 64 + 15,
+						4 + insets.top + i * 64 + nameFontHeight + commentFontAscent); 
+				}
+
 				if (entry.exec != null)
 				{
-					g.drawString(entry.exec != null ? entry.exec : "", 
+					g.setFont(commentFont);
+					g.setColor(commandColor);	
+					g.drawString(truncateText(entry.exec, 300, g.getFontMetrics()), 
 						insets.left + 64 + 15,
 						4 + insets.top + i * 64 + nameFontHeight 
 							+ commentFontHeight + commentFontAscent);
 				}
 			}
+		}
+
+		private String truncateText(String text, int availableWidth,
+			FontMetrics metrics)
+		{
+			int currentChar, currentWidth = 0;
+			for (currentChar = 0; currentChar < text.length() &&
+				currentWidth < availableWidth; currentChar++)
+			{
+				currentWidth += metrics.charWidth(text.charAt(currentChar));
+			}
+
+			return currentChar >= text.length() ? text :
+				text.substring(0, currentChar) + "...";
 		}
 	}
 }

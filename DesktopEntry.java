@@ -14,6 +14,31 @@ public class DesktopEntry
 	public String icon;
 	public boolean noDisplay = false;
 
+	public String getType()
+	{
+		return this.type;
+	}
+
+	public String getName()
+	{
+		return this.name;
+	}
+
+	public String getComment()
+	{
+		return this.comment;
+	}
+
+	public String getExec()
+	{
+		return this.exec;
+	}
+
+	public boolean showInMenu()
+	{
+		return !this.noDisplay;
+	}
+
 	public static DesktopEntry fromDesktopFile(String path)
 	{
 		DesktopEntry entry = new DesktopEntry();
@@ -64,16 +89,16 @@ public class DesktopEntry
 
 	public String findIcon()
 	{
-		return findIcon(this.icon, "hicolor");
+		return findIcon(this.icon, "hicolor", 64);
 	}
 
-	private static String findIcon(String icon, String theme)
+	private static String findIcon(String icon, String theme, int targetSize)
 	{
 		if (icon == null)
 			return null;
 
-		String maxIcon = "";
-		int maxSize = -1;
+		String bestIcon = "";
+		int bestSize = -1;
 
 		File themeFolder = new File("/usr/share/icons/" + theme);
 		for (File sizeFolder : themeFolder.listFiles())
@@ -83,13 +108,18 @@ public class DesktopEntry
 				int size = Integer.parseInt(sizeFolder.getName().split("x")[0]);
 				String extension = icon.contains(".") ? "" : ".png";
 				File iconFile = new File(sizeFolder, "apps/" + icon + extension);
-				if (iconFile.exists() && size > maxSize)
+				if (iconFile.exists())
 				{
-					maxIcon = iconFile.getPath();
-					maxSize = size;
+					if ((bestSize < targetSize && size > bestSize) ||
+						(bestSize > targetSize && size > targetSize && 
+							size >= targetSize))
+					{
+						bestIcon = iconFile.getPath();
+						bestSize = size;
+					}
 				}
 			}
 		}
-		return maxIcon;
+		return bestIcon;
 	}
 }

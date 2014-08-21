@@ -106,7 +106,7 @@ public class DesktopEntry
 
 		for (String theme : themes)
 		{
-			String path = findIcon(this.icon, "/usr/share/icons/hicolor", 64);
+			String path = findIcon(this.icon, "/usr/share/icons/hicolor", 48);
 			if (path != null)
 				return path;
 		}

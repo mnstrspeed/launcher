@@ -60,7 +60,7 @@ public class DesktopEntry
 				line = line.trim();
 				if (line.contains("=") && readingDesktopEntry)
 				{
-					String[] segments = line.split("=");
+					String[] segments = line.split("=", 2);
 					if (segments.length == 2)
 					{
 						String key = segments[0].trim();

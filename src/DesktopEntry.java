@@ -106,7 +106,7 @@ public class DesktopEntry
 
 		for (String theme : themes)
 		{
-			String path = findIcon(this.icon, "/usr/share/icons/hicolor", 48);
+			String path = findIcon(this.icon, theme, 48);
 			if (path != null)
 				return path;
 		}
@@ -131,6 +131,8 @@ public class DesktopEntry
 				File iconFile = new File(sizeFolder, "apps/" + icon + extension);
 				if (iconFile.exists())
 				{
+					System.out.println(iconFile.getPath());
+					// TODO: this doesn't work =(((((
 					if ((bestSize < targetSize && size > bestSize) ||
 						(bestSize > targetSize && size > targetSize && 
 							size >= targetSize))

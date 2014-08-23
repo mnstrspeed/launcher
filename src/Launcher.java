@@ -24,6 +24,8 @@ import java.awt.FontMetrics;
 import java.awt.image.BufferedImage;
 import java.awt.event.KeyListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -49,6 +51,8 @@ public class Launcher extends JFrame
 	public Launcher()
 	{
 		super();
+		
+		long startTime = System.currentTimeMillis();
 
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setUndecorated(true);
@@ -63,6 +67,8 @@ public class Launcher extends JFrame
 		this.setLocationRelativeTo(null);
 		
 		this.setVisible(true);
+		
+		System.out.println("Loading took " + (System.currentTimeMillis() - startTime) + " ms");
 	}
 	
 	protected void initializeComponents()
@@ -82,6 +88,13 @@ public class Launcher extends JFrame
 		this.suggestionList.setLayoutOrientation(JList.VERTICAL);
 		this.suggestionList.setBorder(BorderFactory.createEmptyBorder(0, 16, 16, 16));
 		this.suggestionList.setCellRenderer(new SuggestionListCell.Renderer());
+		this.suggestionList.addMouseMotionListener(new MouseAdapter() {
+			public void mouseMoved(MouseEvent e)
+			{
+				suggestionList.setSelectedIndex(suggestionList.locationToIndex(
+						new Point(e.getX(), e.getY())));
+			}
+		});
 
 		this.getContentPane().setLayout(new BoxLayout(
 			this.getContentPane(), BoxLayout.Y_AXIS));
@@ -91,14 +104,10 @@ public class Launcher extends JFrame
 
 	protected void loadDesktopEntries()
 	{
-		long startTime = System.currentTimeMillis();
-		
 		this.desktopEntries = new ArrayList<DesktopEntry>();
 		this.loadDesktopEntries("/usr/share/applications");
 		this.loadDesktopEntries(System.getProperty("user.home") + 
 			"/.local/share/applications");
-		
-		System.out.println("Loading entries took " + (System.currentTimeMillis() - startTime) + " ms");
 	}
 
 	protected void loadDesktopEntries(String root)
@@ -107,17 +116,18 @@ public class Launcher extends JFrame
 			if (file.isFile() && file.getName().endsWith(".desktop"))
 			{
 				DesktopEntry entry = DesktopEntry.fromDesktopFile(file.getPath());
-				if (entry.showInMenu("Launcher"))
+				if (entry.showInMenu("Unity"))
 					this.desktopEntries.add(entry);
 			}
 	}
 
 	protected void updateSuggestions()
-	{		
+	{
 		List<DesktopEntry> suggestions = this.suggestionEngine
 				.getSuggestions(this.textField.getText());
 		if (suggestions.size() > SUGGESTION_LIMIT)
 			suggestions = suggestions.subList(0, SUGGESTION_LIMIT);
+
 		
 		this.suggestionList.setListData(new Vector<DesktopEntry>(suggestions));
 		this.suggestionList.setSelectedIndex(0);
@@ -219,6 +229,11 @@ public class Launcher extends JFrame
 			return this.getMinimumSize();
 		}
 		
+		private final Color selectedColor = new Color(1.0f, 1f, 1f, 0.9f);
+		private final Color nameColor = Color.BLACK;
+		private final Color commentColor = Color.GRAY;
+		private final Color commandColor = Color.LIGHT_GRAY;
+		
 		@Override
 		public void paintComponent(Graphics g)
 		{
@@ -231,15 +246,10 @@ public class Launcher extends JFrame
 			
 			String fontName = g.getFont().getName();
 			Font nameFont = new Font(fontName, Font.PLAIN, 16);
+			Font commentFont = new Font(fontName, Font.PLAIN, 14);
 			int nameFontAscent = g.getFontMetrics(nameFont).getAscent();
 			int nameFontHeight = g.getFontMetrics(nameFont).getHeight();
-			Font commentFont = new Font(fontName, Font.PLAIN, 14);
 			int commentFontAscent = g.getFontMetrics(commentFont).getAscent();
-
-			Color selectedColor = new Color(1.0f, 1f, 1f, 0.9f);
-			Color nameColor = Color.BLACK;
-			Color commentColor = Color.GRAY;
-			Color commandColor = Color.LIGHT_GRAY;
 			
 			if (this.selected)
 			{
@@ -250,6 +260,7 @@ public class Launcher extends JFrame
 			try
 			{
 				String iconPath = entry.findIcon();
+				System.out.println("Loading " + iconPath);
 				if (iconPath == null)
 					throw new IOException("No icon found");
 

@@ -28,14 +28,61 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Vector;
+import java.net.Socket;
+import java.net.InetSocketAddress;
+import java.net.ServerSocket;
 
 @SuppressWarnings("serial")
 public class Launcher extends JFrame
 		implements KeyListener, DocumentListener
 {
+	private static final int PORT = 62321;
+	private static Launcher instance;
+
+	public static void main(String[] args)
+	{
+		try
+		{
+			Socket socket = new Socket();
+			socket.connect(new InetSocketAddress("127.0.0.1", PORT), 50);
+			socket.getOutputStream().write(42);
+			socket.close();
+		}
+		catch (Exception ex)
+		{
+			// Start new
+			instance = new Launcher();
+			new Thread(new Runnable() {
+				@Override
+				public void run()
+				{
+					try
+					{
+						ServerSocket server = new ServerSocket(PORT);
+						while (true)
+						{
+							Socket connection = server.accept();
+							if (connection.getInputStream().read() == 42)
+								instance.showLauncher();
+							connection.close();
+						}
+					}
+					catch (Exception ex)
+					{
+						throw new RuntimeException(ex);
+					}
+				}
+			}).start();
+
+			if (!Arrays.asList(args).contains("--silent"))
+				instance.showLauncher();
+		}
+	}
+	
 	private List<DesktopEntry> desktopEntries;
 	private SuggestionEngine suggestionEngine;
 
@@ -43,16 +90,9 @@ public class Launcher extends JFrame
 	private JList<DesktopEntry> suggestionList;
 	private static final int SUGGESTION_LIMIT = 5;
 
-	public static void main(String[] args)
-	{
-		new Launcher();
-	}
-
 	public Launcher()
 	{
 		super();
-		
-		long startTime = System.currentTimeMillis();
 
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setUndecorated(true);
@@ -61,14 +101,20 @@ public class Launcher extends JFrame
 		this.loadDesktopEntries();
 		this.suggestionEngine = new SuggestionEngine(
 				this.desktopEntries);
-		this.updateSuggestions();
+	}
 
-		this.pack();
-		this.setLocationRelativeTo(null);
+	public void showLauncher()
+	{
+		this.textField.setText("");
+		this.updateSuggestions();
 		
 		this.setVisible(true);
-		
-		System.out.println("Loading took " + (System.currentTimeMillis() - startTime) + " ms");
+		this.setLocationRelativeTo(null);
+	}
+
+	public void hideLauncher()
+	{
+		this.setVisible(false);
 	}
 	
 	protected void initializeComponents()
@@ -127,7 +173,6 @@ public class Launcher extends JFrame
 				.getSuggestions(this.textField.getText());
 		if (suggestions.size() > SUGGESTION_LIMIT)
 			suggestions = suggestions.subList(0, SUGGESTION_LIMIT);
-
 		
 		this.suggestionList.setListData(new Vector<DesktopEntry>(suggestions));
 		this.suggestionList.setSelectedIndex(0);
@@ -149,9 +194,8 @@ public class Launcher extends JFrame
 			{
 				JOptionPane.showMessageDialog(this, 
 					"Unable to launch " + selected.name);
-				System.exit(1);
 			}
-			System.exit(0);
+			this.hideLauncher();
 		}
 	}
 
@@ -177,7 +221,7 @@ public class Launcher extends JFrame
 	public void keyPressed(KeyEvent e)
 	{
 		if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
-			System.exit(0);
+			this.hideLauncher();
 		if (e.getKeyCode() == KeyEvent.VK_ENTER)
 			this.launchSelected();
 		if (e.getKeyCode() == KeyEvent.VK_UP)

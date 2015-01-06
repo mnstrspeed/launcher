@@ -1,5 +1,4 @@
 import javax.swing.JFrame;
-import javax.swing.JWindow;
 import javax.swing.JComponent;
 import javax.swing.JList;
 import javax.swing.JTextField;
@@ -13,6 +12,7 @@ import javax.swing.event.DocumentEvent;
 import javax.imageio.ImageIO;
 
 import java.awt.Component;
+import java.awt.Window;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -38,7 +38,7 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 
 @SuppressWarnings("serial")
-public class Launcher extends JWindow
+public class Launcher extends JFrame
 		implements KeyListener, DocumentListener
 {
 	private static final int PORT = 62321;
@@ -56,9 +56,7 @@ public class Launcher extends JWindow
 		catch (Exception ex)
 		{
 			// Start new
-			JFrame owner = new JFrame();
-			owner.setVisible(true);
-			instance = new Launcher(owner);
+			instance = new Launcher();
 			new Thread(new Runnable() {
 				@Override
 				public void run()
@@ -93,12 +91,13 @@ public class Launcher extends JWindow
 	private JList<DesktopEntry> suggestionList;
 	private static final int SUGGESTION_LIMIT = 5;
 
-	public Launcher(JFrame owner)
+	public Launcher()
 	{
-		super(owner);
-
-		this.setAlwaysOnTop(true);
+		super();
+		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		this.setType(Window.Type.UTILITY);
 		this.setFocusableWindowState(true);
+		this.setUndecorated(true);
 		this.initializeComponents();
 
 		this.loadDesktopEntries();

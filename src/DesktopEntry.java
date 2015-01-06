@@ -73,7 +73,7 @@ public class DesktopEntry
 						if (key.equals("Comment"))
 							entry.comment = value;
 						if (key.equals("Exec"))
-							entry.exec = value;
+							entry.exec = cleanExec(value);
 						if (key.equals("Icon"))
 							entry.icon = value;
 						if (key.equals("NoDisplay"))
@@ -144,5 +144,9 @@ public class DesktopEntry
 			}
 		}
 		return bestIcon;
+	}
+
+	public static String cleanExec(String exec) {
+		return exec.replaceAll(" %[a-zA-Z]", "");
 	}
 }

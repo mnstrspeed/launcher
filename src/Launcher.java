@@ -22,6 +22,9 @@ import java.awt.Point;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
+import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.awt.event.KeyListener;
 import java.awt.event.KeyEvent;
@@ -56,7 +59,7 @@ public class Launcher extends JFrame
 		catch (Exception ex)
 		{
 			// Start new
-			instance = new Launcher();
+			instance = new Launcher(args.length >= 1 ? args[0] : null);
 			new Thread(new Runnable() {
 				@Override
 				public void run()
@@ -90,8 +93,9 @@ public class Launcher extends JFrame
 	private JTextField textField;
 	private JList<DesktopEntry> suggestionList;
 	private static final int SUGGESTION_LIMIT = 5;
+	private final String preferredDisplay;
 
-	public Launcher()
+	public Launcher(final String preferredDisplay)
 	{
 		super();
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -99,6 +103,8 @@ public class Launcher extends JFrame
 		this.setFocusableWindowState(true);
 		this.setUndecorated(true);
 		this.initializeComponents();
+		
+		this.preferredDisplay = preferredDisplay;
 
 		this.loadDesktopEntries();
 		this.suggestionEngine = new SuggestionEngine(
@@ -110,8 +116,35 @@ public class Launcher extends JFrame
 		this.textField.setText("");
 		this.updateSuggestions();
 		
+		GraphicsDevice targetDevice = null;
+		GraphicsDevice[] devices = GraphicsEnvironment
+			.getLocalGraphicsEnvironment()
+			.getScreenDevices();
+		for (GraphicsDevice device : devices) 
+		{
+			if (device.getIDstring().equals(this.preferredDisplay)) 
+			{
+				targetDevice = device;
+			}
+		}
+		if (targetDevice == null) 
+		{
+			targetDevice = GraphicsEnvironment
+				.getLocalGraphicsEnvironment()
+				.getDefaultScreenDevice();
+		}
+		System.out.println("Showing on " + targetDevice.getIDstring());
+		
+		Rectangle deviceBounds = targetDevice
+			.getDefaultConfiguration().getBounds();
+		Point center = new Point(
+			deviceBounds.x + deviceBounds.width / 2,
+			deviceBounds.y + deviceBounds.height / 2);
+		
 		this.setVisible(true);
-		this.setLocationRelativeTo(null);
+		this.setLocation(
+			center.x - this.getWidth() / 2,
+			center.y - this.getHeight() / 2);
 	}
 
 	public void hideLauncher()

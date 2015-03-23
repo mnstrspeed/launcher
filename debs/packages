@@ -1,0 +1,14 @@
+Package: launcher
+Version: 0.1-1
+Architecture: amd64
+Maintainer: Tom Sanders <mail@tomsanders.nl>
+Depends: java-runtime-headless (>= 1.6)
+Filename: ./launcher_0.1-1.deb
+Size: 10018
+MD5sum: 73aef287b56cabb6869420f17ddd0644
+SHA1: af5209236ecde59761f5ef2476d23125ebbf3f0c
+SHA256: 64e17c7032601fb55e5e02e4c06bf0893930ac5dd460c140d512457ca6f13e0f
+Section: base
+Priority: optional
+Description: Simply a launcher
+

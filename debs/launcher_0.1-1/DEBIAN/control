@@ -1,0 +1,8 @@
+Package: launcher
+Version: 0.1-1
+Section: base
+Priority: optional
+Depends: java-runtime-headless
+Architecture: amd64
+Maintainer: Tom Sanders <mail@tomsanders.nl>
+Description: Simply a launcher
